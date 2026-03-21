@@ -106,10 +106,6 @@
                                 <label for="walk_speed_10m">10m歩行速度（m/s）</label>
                                 <input type="number" id="walk_speed_10m" min="0" max="3" step="0.1" value="0.3">
                             </div>
-                            <div class="form-group">
-                                <label for="fma_lower">Fugl-Meyer 下肢スコア（0-34）</label>
-                                <input type="number" id="fma_lower" min="0" max="34" value="20">
-                            </div>
                         </div>
                     </div>
 
@@ -146,6 +142,43 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="data-tools">
+                    <div class="data-tools-header">
+                        <h3><i class="fas fa-database"></i> データ管理</h3>
+                        <p>ブラウザ内に保存された予測履歴の確認と CSV 出力を行います。</p>
+                    </div>
+
+                    <div class="data-tools-actions">
+                        <button type="button" id="stats-btn" class="btn-secondary">
+                            <i class="fas fa-chart-bar"></i> 統計を更新
+                        </button>
+                        <button type="button" id="export-btn" class="btn-secondary">
+                            <i class="fas fa-file-csv"></i> CSVを出力
+                        </button>
+                    </div>
+
+                    <div class="stats-grid" aria-live="polite">
+                        <div class="stat-card">
+                            <span class="stat-label">累積予測数</span>
+                            <strong class="stat-value" id="stats-total">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">実績記録済</span>
+                            <strong class="stat-value" id="stats-with-outcome">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">実績待ち</span>
+                            <strong class="stat-value" id="stats-pending-outcome">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">文献ルール精度</span>
+                            <strong class="stat-value" id="stats-accuracy">未計算</strong>
+                        </div>
+                    </div>
+
+                    <p class="stats-note" id="stats-note">ブラウザ内の LocalStorage に保存されます。</p>
+                </div>
             </section>
 
             <!-- Results Section -->
@@ -198,18 +231,16 @@
     <script src="js/engine.js"></script>
     <script src="js/app.js"></script>
     
-    <!-- データエクスポート機能 -->
+    <!-- データ管理機能（開発者コンソールからも呼び出し可能） -->
     <script>
-        // CSV出力ボタンの追加（開発者コンソールから呼び出し可能）
         window.exportData = function() {
             predictionStorage.downloadCSV();
-            const stats = predictionStorage.getStatistics();
+            const stats = window.refreshPredictionStats ? window.refreshPredictionStats() : predictionStorage.getStatistics();
             console.log('エクスポート完了:', stats);
         };
         
-        // データ統計の表示
         window.showStats = function() {
-            const stats = predictionStorage.getStatistics();
+            const stats = window.refreshPredictionStats ? window.refreshPredictionStats() : predictionStorage.getStatistics();
             console.log('=== データ統計 ===');
             console.log('累積予測数:', stats.total);
             console.log('実績記録済:', stats.with_outcome);

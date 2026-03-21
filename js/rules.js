@@ -24,7 +24,7 @@ const RULES = {
         },
         
         // 評価ロジック
-        evaluate: (inputs) => {
+        evaluate(inputs) {
             const sittingBalance = inputs.sitting_balance_30s;
             const mi = inputs.motricity_index_lower;
             
@@ -66,7 +66,7 @@ const RULES = {
             return inputs.days_post_stroke <= 7;
         },
         
-        evaluate: (inputs) => {
+        evaluate(inputs) {
             const tct = inputs.tct_score;
             const independent = tct > 40;
             
@@ -106,7 +106,7 @@ const RULES = {
             return inputs.bbs_score !== null && inputs.bbs_score !== undefined;
         },
         
-        evaluate: (inputs) => {
+        evaluate(inputs) {
             const bbs = inputs.bbs_score;
             const independent = bbs >= 14;
             
@@ -143,7 +143,7 @@ const RULES = {
             return inputs.nihss !== null && inputs.nihss !== undefined;
         },
         
-        evaluate: (inputs) => {
+        evaluate(inputs) {
             const nihss = inputs.nihss;
             const sex = inputs.sex;
             
@@ -186,7 +186,7 @@ const RULES = {
             return inputs.walk_speed_10m !== null && inputs.walk_speed_10m !== undefined;
         },
         
-        evaluate: (inputs) => {
+        evaluate(inputs) {
             const speed = inputs.walk_speed_10m;
             
             let category, prediction, isPositive;
@@ -217,45 +217,6 @@ const RULES = {
                     `≥ 0.8 m/s: Community (地域歩行自立)`
                 ],
                 isPositive: isPositive
-            };
-        }
-    },
-
-    /**
-     * Fugl-Meyer 下肢スコア（サンプルルール）
-     * 出典: 架空の文献（実際の文献に置き換えてください）
-     */
-    fma_lower: {
-        name: "Fugl-Meyer下肢スコア",
-        source: "Sample et al. (2020) Journal of Stroke Rehabilitation",
-        sourceUrl: "https://pubmed.ncbi.nlm.nih.gov/",
-        evidenceLevel: "Cohort Study",
-        badge: "badge-cohort",
-        auc: 0.85,
-        
-        // 常時適用（FMA下肢スコアが入力されている場合）
-        applyWhen: (inputs) => {
-            return inputs.fma_lower !== null && inputs.fma_lower !== undefined;
-        },
-        
-        evaluate: (inputs) => {
-            const fma = inputs.fma_lower;
-            const threshold = 20;  // カットオフ値（文献から取得）
-            const independent = fma >= threshold;
-            
-            return {
-                prediction: independent 
-                    ? "歩行自立の可能性が高い（FMA下肢≥20）" 
-                    : "歩行自立は難しい可能性（FMA下肢<20）",
-                probability: null,
-                note: `FMA下肢: ${fma}点（閾値: ${threshold}点）`,
-                details: [
-                    `Fugl-Meyer Assessment 下肢: ${fma}点`,
-                    `カットオフ値: ${threshold}点`,
-                    `判定: ${independent ? 'FMA ≥ 20 → 歩行自立の可能性' : 'FMA < 20 → 歩行自立困難'}`,
-                    `AUC: ${this.auc}`
-                ],
-                isPositive: independent
             };
         }
     }

@@ -73,7 +73,7 @@ class PredictionStorage {
         // ヘッダー行
         const headers = [
             'ID', '評価日時', '年齢', '性別', '発症日数', 'NIHSS', 'TCT', 'BBS', 
-            '10m速度', 'MI下肢', 'FMA下肢', 'MMSE', '座位30秒', '空間無視', 
+            '10m速度', 'MI下肢', 'MMSE', '座位30秒', '空間無視', 
             '介護者', '糖尿病', 'コンセンサス', '実績FAC', '実績記録日'
         ];
         
@@ -89,7 +89,6 @@ class PredictionStorage {
             p.inputs.bbs_score,
             p.inputs.walk_speed_10m,
             p.inputs.motricity_index_lower,
-            p.inputs.fma_lower,
             p.inputs.mmse_score,
             p.inputs.sitting_balance_30s ? 1 : 0,
             p.inputs.spatial_neglect ? 1 : 0,

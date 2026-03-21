@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('prediction-form');
     const resetBtn = document.getElementById('reset-btn');
     const resultsSection = document.getElementById('results-section');
+    const exportBtn = document.getElementById('export-btn');
+    const statsBtn = document.getElementById('stats-btn');
     
     /**
      * フォーム送信イベント
@@ -46,20 +48,21 @@ document.addEventListener('DOMContentLoaded', function() {
     resetBtn.addEventListener('click', function() {
         form.reset();
         resultsSection.style.display = 'none';
-        
-        // デフォルト値をリセット
-        document.getElementById('age').value = 70;
-        document.getElementById('sex').value = '男性';
-        document.getElementById('days_post_stroke').value = 7;
-        document.getElementById('nihss').value = 8;
-        document.getElementById('tct_score').value = 35;
-        document.getElementById('motricity_index_lower').value = 40;
-        document.getElementById('bbs_score').value = 12;
-        document.getElementById('walk_speed_10m').value = 0.3;
-        document.getElementById('mmse_score').value = 24;
-        document.getElementById('sitting_balance_30s').checked = true;
-        document.getElementById('caregiver_available').checked = true;
+        refreshStats();
     });
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            predictionStorage.downloadCSV();
+            refreshStats();
+        });
+    }
+
+    if (statsBtn) {
+        statsBtn.addEventListener('click', function() {
+            refreshStats();
+        });
+    }
     
     /**
      * フォームからデータを収集
@@ -67,28 +70,41 @@ document.addEventListener('DOMContentLoaded', function() {
     function collectFormData() {
         return {
             // 基本情報
-            age: parseFloat(document.getElementById('age').value) || null,
+            age: getNumericValue('age'),
             sex: document.getElementById('sex').value,
-            days_post_stroke: parseFloat(document.getElementById('days_post_stroke').value) || null,
+            days_post_stroke: getNumericValue('days_post_stroke'),
             stroke_type: document.getElementById('stroke_type').value,
             
             // 神経学的評価
-            nihss: parseFloat(document.getElementById('nihss').value) || null,
+            nihss: getNumericValue('nihss'),
             spatial_neglect: document.getElementById('spatial_neglect').checked,
             
             // 身体機能評価
-            tct_score: parseFloat(document.getElementById('tct_score').value) || null,
+            tct_score: getNumericValue('tct_score'),
             sitting_balance_30s: document.getElementById('sitting_balance_30s').checked,
-            motricity_index_lower: parseFloat(document.getElementById('motricity_index_lower').value) || null,
-            bbs_score: parseFloat(document.getElementById('bbs_score').value) || null,
-            walk_speed_10m: parseFloat(document.getElementById('walk_speed_10m').value) || null,
-            fma_lower: parseFloat(document.getElementById('fma_lower').value) || null,
+            motricity_index_lower: getNumericValue('motricity_index_lower'),
+            bbs_score: getNumericValue('bbs_score'),
+            walk_speed_10m: getNumericValue('walk_speed_10m'),
             
             // 認知機能・社会背景
-            mmse_score: parseFloat(document.getElementById('mmse_score').value) || null,
+            mmse_score: getNumericValue('mmse_score'),
             caregiver_available: document.getElementById('caregiver_available').checked,
             diabetes: document.getElementById('diabetes').checked
         };
+    }
+
+    /**
+     * 数値入力を取得
+     * 0 は有効値として保持し、空文字のみ null 扱いにする
+     */
+    function getNumericValue(id) {
+        const value = document.getElementById(id).value;
+        if (value === '') {
+            return null;
+        }
+
+        const parsedValue = parseFloat(value);
+        return Number.isNaN(parsedValue) ? null : parsedValue;
     }
     
     /**
@@ -118,6 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 各ルールの結果を表示
         displayRuleResults(prediction.results);
+
+        // 保存済みデータ統計を更新
+        refreshStats();
     }
     
     /**
@@ -209,9 +228,44 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }).join('');
     }
+
+    /**
+     * 保存済みデータ統計を画面に反映
+     */
+    function refreshStats() {
+        const stats = predictionStorage.getStatistics();
+
+        setText('stats-total', stats.total);
+        setText('stats-with-outcome', stats.with_outcome);
+        setText('stats-pending-outcome', stats.pending_outcome);
+        setText('stats-accuracy', stats.accuracy !== null
+            ? (stats.accuracy * 100).toFixed(1) + '%'
+            : '未計算'
+        );
+
+        const note = stats.date_range.last
+            ? `最終保存: ${formatTimestamp(stats.date_range.last)} / ブラウザ内の LocalStorage に保存されます。`
+            : 'ブラウザ内の LocalStorage に保存されます。';
+        setText('stats-note', note);
+
+        return stats;
+    }
+
+    function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
+
+    function formatTimestamp(timestamp) {
+        return new Date(timestamp).toLocaleString('ja-JP');
+    }
     
     /**
      * 初期状態では結果セクションを非表示
      */
     resultsSection.style.display = 'none';
+    window.refreshPredictionStats = refreshStats;
+    refreshStats();
 });
