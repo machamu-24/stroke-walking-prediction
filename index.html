@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脳卒中後歩行予後予測システム - 文献ベースデモ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-walking"></i> 脳卒中後歩行予後予測システム</h1>
+                <p class="subtitle">文献ベースのルールエンジン - エビデンスに基づく説明可能な予測</p>
+            </div>
+        </header>
+
+        <!-- Info Banner -->
+        <div class="info-banner">
+            <i class="fas fa-info-circle"></i>
+            <div class="info-text">
+                <strong>このシステムについて:</strong> 機械学習ではなく、既存の臨床文献に基づくルールベースエンジンを採用。「なぜこの予測が出たか」を患者・家族・他職種に説明できる透明性の高いシステムです。
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Input Form -->
+            <section class="input-section">
+                <h2><i class="fas fa-edit"></i> 患者情報入力</h2>
+                
+                <form id="prediction-form">
+                    <!-- Section 1: 患者基本情報 -->
+                    <div class="form-section">
+                        <h3>基本情報</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="age">年齢（歳）</label>
+                                <input type="number" id="age" min="0" max="120" value="70">
+                            </div>
+                            <div class="form-group">
+                                <label for="sex">性別</label>
+                                <select id="sex">
+                                    <option value="男性">男性</option>
+                                    <option value="女性">女性</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="days_post_stroke">発症からの日数</label>
+                                <input type="number" id="days_post_stroke" min="0" max="1000" value="7">
+                            </div>
+                            <div class="form-group">
+                                <label for="stroke_type">病型</label>
+                                <select id="stroke_type">
+                                    <option value="脳梗塞">脳梗塞</option>
+                                    <option value="脳出血">脳出血</option>
+                                    <option value="くも膜下出血">くも膜下出血</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: 神経学的評価 -->
+                    <div class="form-section">
+                        <h3>神経学的評価</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nihss">NIHSS スコア（0-42）</label>
+                                <input type="number" id="nihss" min="0" max="42" value="8">
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="spatial_neglect">
+                                    半側空間無視あり
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: 身体機能評価 -->
+                    <div class="form-section">
+                        <h3>身体機能評価</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tct_score">Trunk Control Test（TCT）スコア（0-100）</label>
+                                <input type="number" id="tct_score" min="0" max="100" value="35">
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="sitting_balance_30s" checked>
+                                    座位保持30秒可能
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="motricity_index_lower">Motricity Index 下肢スコア（0-100）</label>
+                                <input type="number" id="motricity_index_lower" min="0" max="100" value="40">
+                            </div>
+                            <div class="form-group">
+                                <label for="bbs_score">Berg Balance Scale（BBS）スコア（0-56）</label>
+                                <input type="number" id="bbs_score" min="0" max="56" value="12">
+                            </div>
+                            <div class="form-group">
+                                <label for="walk_speed_10m">10m歩行速度（m/s）</label>
+                                <input type="number" id="walk_speed_10m" min="0" max="3" step="0.1" value="0.3">
+                            </div>
+                            <div class="form-group">
+                                <label for="fma_lower">Fugl-Meyer 下肢スコア（0-34）</label>
+                                <input type="number" id="fma_lower" min="0" max="34" value="20">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: 認知機能・社会背景 -->
+                    <div class="form-section">
+                        <h3>認知機能・社会背景</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="mmse_score">MMSE スコア（0-30）</label>
+                                <input type="number" id="mmse_score" min="0" max="30" value="24">
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="caregiver_available" checked>
+                                    介護者あり
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="diabetes">
+                                    糖尿病合併
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-calculator"></i> 予測を実行
+                        </button>
+                        <button type="button" id="reset-btn" class="btn-secondary">
+                            <i class="fas fa-redo"></i> リセット
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <h2><i class="fas fa-chart-line"></i> 予測結果</h2>
+                
+                <!-- Consensus Summary -->
+                <div class="consensus-box" id="consensus-box">
+                    <!-- Dynamically filled by JavaScript -->
+                </div>
+
+                <!-- Individual Rules Results -->
+                <div class="rules-container" id="rules-container">
+                    <!-- Dynamically filled by JavaScript -->
+                </div>
+
+                <!-- Evidence Level Legend -->
+                <div class="legend-box">
+                    <h3><i class="fas fa-book"></i> エビデンスレベルの説明</h3>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <span class="badge badge-sr">SR</span>
+                            <span>Systematic Review（システマティックレビュー）</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="badge badge-cohort">コホート</span>
+                            <span>Cohort Study（コホート研究）</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="badge badge-expert">専門家</span>
+                            <span>Expert Classification（専門家分類）</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 脳卒中後歩行予後予測システム - 文献ベースデモ版 | 開発: まさむ（理学療法士 / エンジニア）</p>
+            <p class="footer-note">
+                <i class="fas fa-exclamation-triangle"></i> 
+                このツールは臨床判断の補助を目的としており、最終的な判断は医療従事者が行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/rules.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- データエクスポート機能 -->
+    <script>
+        // CSV出力ボタンの追加（開発者コンソールから呼び出し可能）
+        window.exportData = function() {
+            predictionStorage.downloadCSV();
+            const stats = predictionStorage.getStatistics();
+            console.log('エクスポート完了:', stats);
+        };
+        
+        // データ統計の表示
+        window.showStats = function() {
+            const stats = predictionStorage.getStatistics();
+            console.log('=== データ統計 ===');
+            console.log('累積予測数:', stats.total);
+            console.log('実績記録済:', stats.with_outcome);
+            console.log('実績待ち:', stats.pending_outcome);
+            if (stats.accuracy !== null) {
+                console.log('文献ルール精度:', (stats.accuracy * 100).toFixed(1) + '%');
+            }
+            return stats;
+        };
+    </script>
+</body>
+</html>
