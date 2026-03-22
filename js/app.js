@@ -188,10 +188,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? 'fa-check-circle'
                 : predictionClass === 'negative'
                     ? 'fa-exclamation-circle'
-                    : 'fa-route';
+                    : predictionClass === 'muted'
+                        ? 'fa-ban'
+                        : 'fa-route';
             
             return `
-                <div class="rule-card">
+                <div class="rule-card ${result.isApplicable === false ? 'rule-card-unavailable' : ''}">
                     <div class="rule-header">
                         <div class="rule-title">
                             <i class="fas ${icon}"></i>

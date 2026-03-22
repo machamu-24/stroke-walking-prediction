@@ -17,10 +17,15 @@ const RULES = {
         accuracy: 0.92,
         sensitivity: 0.96,
         specificity: 0.75,
+        showWhenUnavailable: true,
         
         // 適用条件: 発症3日以内
         applyWhen: (inputs) => {
             return inputs.days_post_stroke <= 3;
+        },
+
+        getUnavailableReason(inputs) {
+            return `適用条件は発症3日以内です。現在は発症 ${inputs.days_post_stroke} 日のため、このルールは評価対象外です。`;
         },
         
         // 評価ロジック
@@ -60,10 +65,15 @@ const RULES = {
         evidenceLevel: "Cohort Study",
         badge: "badge-cohort",
         accuracy: 0.91,
+        showWhenUnavailable: true,
         
         // 適用条件: 発症7日以内
         applyWhen: (inputs) => {
             return inputs.days_post_stroke <= 7;
+        },
+
+        getUnavailableReason(inputs) {
+            return `適用条件は発症7日以内です。現在は発症 ${inputs.days_post_stroke} 日のため、このルールは評価対象外です。`;
         },
         
         evaluate(inputs) {

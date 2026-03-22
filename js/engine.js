@@ -14,28 +14,53 @@ class StrokeWalkingPredictionEngine {
      * @returns {Object} - 予測結果
      */
     predictAll(inputs) {
-        const results = [];
+        const applicableResults = [];
+        const unavailableResults = [];
         
         // 各ルールを評価
         for (const [ruleId, rule] of Object.entries(this.rules)) {
             // 適用条件を満たすかチェック
             if (rule.applyWhen(inputs)) {
                 const evaluation = rule.evaluate(inputs);
-                results.push({
+                applicableResults.push({
                     id: ruleId,
                     name: rule.name,
                     source: rule.source,
                     sourceUrl: rule.sourceUrl,
                     evidenceLevel: rule.evidenceLevel,
                     badge: rule.badge,
+                    isApplicable: true,
                     consensusEligible: rule.consensusEligible !== false,
                     ...evaluation
                 });
+            } else if (rule.showWhenUnavailable) {
+                unavailableResults.push({
+                    id: ruleId,
+                    name: rule.name,
+                    source: rule.source,
+                    sourceUrl: rule.sourceUrl,
+                    evidenceLevel: rule.evidenceLevel,
+                    badge: rule.badge,
+                    isApplicable: false,
+                    consensusEligible: false,
+                    prediction: "適用外",
+                    probability: null,
+                    note: `発症からの日数: ${inputs.days_post_stroke}日`,
+                    details: [
+                        rule.getUnavailableReason
+                            ? rule.getUnavailableReason(inputs)
+                            : "適用条件を満たしていません。"
+                    ],
+                    displayTone: "muted",
+                    isPositive: null
+                });
             }
         }
+
+        const results = [...applicableResults, ...unavailableResults];
         
         // コンセンサス分析
-        const consensus = this.calculateConsensus(results);
+        const consensus = this.calculateConsensus(applicableResults);
         
         return {
             results: results,

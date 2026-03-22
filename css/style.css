@@ -493,6 +493,11 @@ body {
     border-color: var(--primary-color);
 }
 
+.rule-card.rule-card-unavailable {
+    opacity: 0.92;
+    border-style: dashed;
+}
+
 .rule-header {
     display: flex;
     justify-content: space-between;
@@ -560,6 +565,12 @@ body {
 .rule-prediction.neutral {
     border-left-color: var(--info-color);
     background: #eff6ff;
+}
+
+.rule-prediction.muted {
+    border-left-color: var(--text-secondary);
+    background: #f8fafc;
+    color: var(--text-secondary);
 }
 
 .rule-details {
