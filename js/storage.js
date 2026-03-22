@@ -133,16 +133,17 @@ class PredictionStorage {
     getStatistics() {
         const predictions = this.getAll();
         const withOutcome = predictions.filter(p => p.actual_outcome !== null);
+        const scoredOutcomes = withOutcome.filter(p => p.consensus && p.consensus.score !== null);
         
         // 文献ルールの精度計算（実績データがある場合）
         let accuracy = null;
-        if (withOutcome.length > 0) {
-            const correct = withOutcome.filter(p => {
+        if (scoredOutcomes.length > 0) {
+            const correct = scoredOutcomes.filter(p => {
                 const predicted = p.consensus.score > 0.5;
                 const actual = (p.actual_outcome.fac_at_discharge || 0) >= 4;
                 return predicted === actual;
             }).length;
-            accuracy = correct / withOutcome.length;
+            accuracy = correct / scoredOutcomes.length;
         }
         
         return {

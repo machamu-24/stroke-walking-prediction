@@ -180,6 +180,7 @@ const RULES = {
         sourceUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC2587153/",
         evidenceLevel: "Expert Classification",
         badge: "badge-expert",
+        consensusEligible: false,
         
         // 常時適用（歩行速度がある場合）
         applyWhen: (inputs) => {
@@ -189,34 +190,33 @@ const RULES = {
         evaluate(inputs) {
             const speed = inputs.walk_speed_10m;
             
-            let category, prediction, isPositive;
+            let category, prediction;
             
             if (speed >= 0.8) {
                 category = "Community Ambulator";
                 prediction = "Community（地域歩行自立）";
-                isPositive = true;
             } else if (speed >= 0.4) {
                 category = "Limited Community Ambulator";
                 prediction = "Limited Community（限定的地域歩行）";
-                isPositive = true; // neutral扱い
             } else {
                 category = "Household Ambulator";
                 prediction = "Household（屋内中心・歩行補助が必要な可能性）";
-                isPositive = false;
             }
             
             return {
                 prediction: prediction,
                 probability: null,
                 note: `10m歩行速度: ${speed} m/s`,
+                displayTone: "neutral",
                 details: [
                     `10m歩行速度: ${speed} m/s`,
                     `分類カテゴリ: ${category}`,
+                    `参考表示: 現時点の歩行レベル分類であり、予後コンセンサスには含めません`,
                     `< 0.4 m/s: Household (家庭内歩行)`,
                     `0.4 - 0.8 m/s: Limited Community (限定的地域歩行)`,
                     `≥ 0.8 m/s: Community (地域歩行自立)`
                 ],
-                isPositive: isPositive
+                isPositive: null
             };
         }
     }

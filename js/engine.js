@@ -28,6 +28,7 @@ class StrokeWalkingPredictionEngine {
                     sourceUrl: rule.sourceUrl,
                     evidenceLevel: rule.evidenceLevel,
                     badge: rule.badge,
+                    consensusEligible: rule.consensusEligible !== false,
                     ...evaluation
                 });
             }
@@ -52,13 +53,35 @@ class StrokeWalkingPredictionEngine {
             return {
                 score: null,
                 tone: "評価不可",
-                description: "適用可能なルールがありません。入力データを確認してください。"
+                description: "適用可能なルールがありません。入力データを確認してください。",
+                cssClass: "neutral",
+                totalCount: 0,
+                positiveCount: 0,
+                excludedCount: 0
+            };
+        }
+
+        const consensusResults = results.filter(r => r.consensusEligible !== false);
+        const excludedResults = results.filter(r => r.consensusEligible === false);
+        const excludedNames = excludedResults.map(r => r.name).join("、");
+
+        if (consensusResults.length === 0) {
+            return {
+                score: null,
+                tone: "参考情報のみ",
+                description: excludedNames
+                    ? `${excludedNames}は参考表示していますが、予後コンセンサスに含めるルールがありません。`
+                    : "予後コンセンサスに含めるルールがありません。",
+                cssClass: "neutral",
+                totalCount: 0,
+                positiveCount: 0,
+                excludedCount: excludedResults.length
             };
         }
 
         // 自立寄り（positive）のルール数をカウント
-        const positiveCount = results.filter(r => r.isPositive === true).length;
-        const totalCount = results.length;
+        const positiveCount = consensusResults.filter(r => r.isPositive === true).length;
+        const totalCount = consensusResults.length;
         
         // コンセンサススコア（0-1）
         const score = totalCount > 0 ? positiveCount / totalCount : 0;
@@ -68,16 +91,20 @@ class StrokeWalkingPredictionEngine {
         
         if (score >= 0.7) {
             tone = "自立寄りのコンセンサス";
-            description = `評価した${totalCount}文献のうち、${positiveCount}文献が歩行自立を示唆しています。総合的に歩行自立の可能性が高いと考えられます。`;
+            description = `評価可能な予後ルール${totalCount}件のうち、${positiveCount}件が歩行自立を示唆しています。総合的に歩行自立の可能性が高いと考えられます。`;
             cssClass = "";
         } else if (score >= 0.4) {
             tone = "拮抗（文献の示唆が割れている）";
-            description = `評価した${totalCount}文献のうち、${positiveCount}文献が歩行自立を示唆しています。文献により予測が分かれており、個別評価が必要です。`;
+            description = `評価可能な予後ルール${totalCount}件のうち、${positiveCount}件が歩行自立を示唆しています。文献により予測が分かれており、個別評価が必要です。`;
             cssClass = "neutral";
         } else {
             tone = "困難寄りのコンセンサス";
-            description = `評価した${totalCount}文献のうち、${positiveCount}文献のみが歩行自立を示唆しています。歩行自立には課題がある可能性が高いと考えられます。`;
+            description = `評価可能な予後ルール${totalCount}件のうち、${positiveCount}件のみが歩行自立を示唆しています。歩行自立には課題がある可能性が高いと考えられます。`;
             cssClass = "negative";
+        }
+
+        if (excludedResults.length > 0) {
+            description += ` なお、${excludedNames}は現時点の歩行レベル分類として参考表示し、コンセンサスには含めていません。`;
         }
         
         return {
@@ -86,7 +113,8 @@ class StrokeWalkingPredictionEngine {
             description: description,
             cssClass: cssClass,
             totalCount: totalCount,
-            positiveCount: positiveCount
+            positiveCount: positiveCount,
+            excludedCount: excludedResults.length
         };
     }
 

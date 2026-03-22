@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsSection = document.getElementById('results-section');
     const exportBtn = document.getElementById('export-btn');
     const statsBtn = document.getElementById('stats-btn');
+    const daysPostStrokeInput = document.getElementById('days_post_stroke');
+    const timingAlert = document.getElementById('timing-alert');
     
     /**
      * フォーム送信イベント
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     resetBtn.addEventListener('click', function() {
         form.reset();
         resultsSection.style.display = 'none';
+        updateTimingAlert();
         refreshStats();
     });
 
@@ -62,6 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
         statsBtn.addEventListener('click', function() {
             refreshStats();
         });
+    }
+
+    if (daysPostStrokeInput) {
+        daysPostStrokeInput.addEventListener('input', updateTimingAlert);
+        daysPostStrokeInput.addEventListener('change', updateTimingAlert);
     }
     
     /**
@@ -175,8 +183,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         rulesContainer.innerHTML = results.map(result => {
-            const predictionClass = result.isPositive ? 'positive' : 'negative';
-            const icon = result.isPositive ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const predictionClass = result.displayTone || (result.isPositive ? 'positive' : 'negative');
+            const icon = predictionClass === 'positive'
+                ? 'fa-check-circle'
+                : predictionClass === 'negative'
+                    ? 'fa-exclamation-circle'
+                    : 'fa-route';
             
             return `
                 <div class="rule-card">
@@ -261,11 +273,68 @@ document.addEventListener('DOMContentLoaded', function() {
     function formatTimestamp(timestamp) {
         return new Date(timestamp).toLocaleString('ja-JP');
     }
+
+    function updateTimingAlert() {
+        if (!timingAlert) {
+            return;
+        }
+
+        const days = getNumericValue('days_post_stroke');
+
+        if (days === null || days < 0) {
+            timingAlert.hidden = true;
+            timingAlert.innerHTML = '';
+            return;
+        }
+
+        const eposActive = days <= 3;
+        const twistActive = days <= 7;
+        let summary;
+
+        if (days <= 3) {
+            summary = 'EPOS と TWIST の両方が適用範囲です。';
+        } else if (days <= 7) {
+            summary = 'TWIST は適用範囲内ですが、EPOS は適用外です。';
+        } else {
+            summary = 'EPOS と TWIST は適用外です。時期依存ではないルールを中心に解釈してください。';
+        }
+
+        timingAlert.hidden = false;
+        timingAlert.innerHTML = `
+            <div class="timing-alert-title">
+                <i class="fas fa-clock"></i> 時期依存ルールの適用状況
+            </div>
+            <div class="timing-alert-summary">
+                発症 ${days} 日: ${summary}
+            </div>
+            <div class="timing-alert-list">
+                <div class="timing-alert-item">
+                    <div>
+                        <strong>EPOSモデル</strong><br>
+                        <span>発症3日以内のみ適用</span>
+                    </div>
+                    <span class="timing-alert-status ${eposActive ? 'active' : 'inactive'}">
+                        ${eposActive ? '適用可能' : '適用外'}
+                    </span>
+                </div>
+                <div class="timing-alert-item">
+                    <div>
+                        <strong>TWISTアルゴリズム</strong><br>
+                        <span>発症7日以内のみ適用</span>
+                    </div>
+                    <span class="timing-alert-status ${twistActive ? 'active' : 'inactive'}">
+                        ${twistActive ? '適用可能' : '適用外'}
+                    </span>
+                </div>
+            </div>
+        `;
+    }
     
     /**
      * 初期状態では結果セクションを非表示
      */
     resultsSection.style.display = 'none';
     window.refreshPredictionStats = refreshStats;
+    updateTimingAlert();
     refreshStats();
 });
