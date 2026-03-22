@@ -6,6 +6,16 @@
 class StrokeWalkingPredictionEngine {
     constructor() {
         this.rules = RULES;
+        this.inputCatalog = {
+            nihss: { label: "NIHSSスコア", section: "神経学的評価" },
+            tct_score: { label: "TCTスコア", section: "身体機能評価" },
+            sitting_balance_30s: { label: "座位保持30秒", section: "身体機能評価" },
+            motricity_index_lower: { label: "Motricity Index下肢", section: "身体機能評価" },
+            bbs_score: { label: "BBSスコア", section: "身体機能評価" },
+            walk_speed_10m: { label: "10m歩行速度", section: "身体機能評価" },
+            mmse_score: { label: "MMSEスコア", section: "認知機能・社会背景" },
+            spatial_neglect: { label: "半側空間無視", section: "神経学的評価" }
+        };
     }
 
     /**
@@ -19,8 +29,13 @@ class StrokeWalkingPredictionEngine {
         
         // 各ルールを評価
         for (const [ruleId, rule] of Object.entries(this.rules)) {
+            const missingInputs = this.getMissingRequiredInputs(rule, inputs);
+            const isAvailableForPatient = rule.isAvailableForPatient
+                ? rule.isAvailableForPatient(inputs)
+                : rule.applyWhen(inputs);
+
             // 適用条件を満たすかチェック
-            if (rule.applyWhen(inputs)) {
+            if (isAvailableForPatient && missingInputs.length === 0) {
                 const evaluation = rule.evaluate(inputs);
                 applicableResults.push({
                     id: ruleId,
@@ -33,7 +48,7 @@ class StrokeWalkingPredictionEngine {
                     consensusEligible: rule.consensusEligible !== false,
                     ...evaluation
                 });
-            } else if (rule.showWhenUnavailable) {
+            } else if (!isAvailableForPatient && rule.showWhenUnavailable) {
                 unavailableResults.push({
                     id: ruleId,
                     name: rule.name,
@@ -58,13 +73,78 @@ class StrokeWalkingPredictionEngine {
         }
 
         const results = [...applicableResults, ...unavailableResults];
+        const suggestions = this.getAssessmentSuggestions(inputs);
         
         // コンセンサス分析
         const consensus = this.calculateConsensus(applicableResults);
         
         return {
             results: results,
-            consensus: consensus
+            consensus: consensus,
+            suggestions: suggestions
+        };
+    }
+
+    getAssessmentSuggestions(inputs) {
+        const actionable = [];
+        const blocked = [];
+
+        for (const [ruleId, rule] of Object.entries(this.rules)) {
+            const missingInputs = this.getMissingRequiredInputs(rule, inputs);
+            if (missingInputs.length === 0) {
+                continue;
+            }
+
+            const isAvailableForPatient = rule.isAvailableForPatient
+                ? rule.isAvailableForPatient(inputs)
+                : rule.applyWhen(inputs);
+
+            const suggestion = {
+                id: ruleId,
+                name: rule.name,
+                source: rule.source,
+                sourceUrl: rule.sourceUrl,
+                evidenceLevel: rule.evidenceLevel,
+                badge: rule.badge,
+                missingInputs: missingInputs,
+                sections: this.getUniqueSections(missingInputs),
+                outcome: rule.suggestionOutcome || rule.name,
+                priority: rule.suggestionPriority || 99
+            };
+
+            if (isAvailableForPatient) {
+                actionable.push({
+                    ...suggestion,
+                    message: `${missingInputs.map(input => input.label).join("、")}を追加で取得すると、${rule.suggestionOutcome || rule.name}に関する文献を活用できます。`
+                });
+            } else if (rule.showWhenUnavailable) {
+                blocked.push({
+                    ...suggestion,
+                    message: rule.getUnavailableReason
+                        ? rule.getUnavailableReason(inputs)
+                        : "現時点では適用条件を満たしていません。"
+                });
+            }
+        }
+
+        const byPriority = (a, b) => {
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
+            }
+
+            if (a.missingInputs.length !== b.missingInputs.length) {
+                return a.missingInputs.length - b.missingInputs.length;
+            }
+
+            return a.name.localeCompare(b.name, "ja");
+        };
+
+        actionable.sort(byPriority);
+        blocked.sort(byPriority);
+
+        return {
+            actionable: actionable,
+            blocked: blocked
         };
     }
 
@@ -141,6 +221,28 @@ class StrokeWalkingPredictionEngine {
             positiveCount: positiveCount,
             excludedCount: excludedResults.length
         };
+    }
+
+    getMissingRequiredInputs(rule, inputs) {
+        const requiredInputs = rule.requiredInputs || [];
+
+        return requiredInputs
+            .filter(key => this.isMissingInputValue(inputs[key]))
+            .map(key => ({
+                key: key,
+                label: this.inputCatalog[key]?.label || key,
+                section: this.inputCatalog[key]?.section || "未分類"
+            }));
+    }
+
+    getUniqueSections(inputs) {
+        return [...new Set(inputs.map(input => input.section))];
+    }
+
+    isMissingInputValue(value) {
+        return value === null
+            || value === undefined
+            || (typeof value === "string" && value.trim() === "");
     }
 
     /**

@@ -18,9 +18,16 @@ const RULES = {
         sensitivity: 0.96,
         specificity: 0.75,
         showWhenUnavailable: true,
+        requiredInputs: ["sitting_balance_30s", "motricity_index_lower"],
+        suggestionOutcome: "6ヶ月後の歩行自立予測",
+        suggestionPriority: 1,
         
         // 適用条件: 発症3日以内
         applyWhen: (inputs) => {
+            return inputs.days_post_stroke <= 3;
+        },
+
+        isAvailableForPatient(inputs) {
             return inputs.days_post_stroke <= 3;
         },
 
@@ -66,9 +73,16 @@ const RULES = {
         badge: "badge-cohort",
         accuracy: 0.91,
         showWhenUnavailable: true,
+        requiredInputs: ["tct_score"],
+        suggestionOutcome: "6週間以内の歩行自立予測",
+        suggestionPriority: 1,
         
         // 適用条件: 発症7日以内
         applyWhen: (inputs) => {
+            return inputs.days_post_stroke <= 7;
+        },
+
+        isAvailableForPatient(inputs) {
             return inputs.days_post_stroke <= 7;
         },
 
@@ -110,10 +124,17 @@ const RULES = {
         auc: 0.81,
         sensitivity: 0.73,
         specificity: 0.89,
+        requiredInputs: ["bbs_score"],
+        suggestionOutcome: "退院時の歩行自立予測",
+        suggestionPriority: 2,
         
         // 常時適用
         applyWhen: (inputs) => {
             return inputs.bbs_score !== null && inputs.bbs_score !== undefined;
+        },
+
+        isAvailableForPatient() {
+            return true;
         },
         
         evaluate(inputs) {
@@ -147,10 +168,17 @@ const RULES = {
         sourceUrl: "https://www.jstage.jst.go.jp/article/ptr/advpub/0/advpub_25-E10354/_article/-char/en",
         evidenceLevel: "Cohort Study",
         badge: "badge-cohort",
+        requiredInputs: ["nihss"],
+        suggestionOutcome: "歩行自立予測",
+        suggestionPriority: 2,
         
         // 常時適用
         applyWhen: (inputs) => {
             return inputs.nihss !== null && inputs.nihss !== undefined;
+        },
+
+        isAvailableForPatient() {
+            return true;
         },
         
         evaluate(inputs) {
@@ -191,10 +219,17 @@ const RULES = {
         evidenceLevel: "Expert Classification",
         badge: "badge-expert",
         consensusEligible: false,
+        requiredInputs: ["walk_speed_10m"],
+        suggestionOutcome: "現時点の歩行レベル分類",
+        suggestionPriority: 3,
         
         // 常時適用（歩行速度がある場合）
         applyWhen: (inputs) => {
             return inputs.walk_speed_10m !== null && inputs.walk_speed_10m !== undefined;
+        },
+
+        isAvailableForPatient() {
+            return true;
         },
         
         evaluate(inputs) {

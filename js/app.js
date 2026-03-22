@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const savedId = predictionStorage.save({
             inputs: inputs,
             results: prediction.results,
-            consensus: prediction.consensus
+            consensus: prediction.consensus,
+            suggestions: prediction.suggestions
         });
         
         // 結果表示
@@ -139,12 +140,97 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // コンセンサスボックスを表示
         displayConsensus(prediction.consensus);
+
+        // 追加評価の提案を表示
+        displayAssessmentSuggestions(prediction.suggestions);
         
         // 各ルールの結果を表示
         displayRuleResults(prediction.results);
 
         // 保存済みデータ統計を更新
         refreshStats();
+    }
+
+    function displayAssessmentSuggestions(suggestions) {
+        const suggestionsSection = document.getElementById('suggestions-section');
+
+        if (!suggestionsSection) {
+            return;
+        }
+
+        const actionable = suggestions?.actionable || [];
+        const blocked = suggestions?.blocked || [];
+
+        if (actionable.length === 0 && blocked.length === 0) {
+            suggestionsSection.innerHTML = `
+                <div class="suggestions-box">
+                    <div class="suggestions-title">
+                        <i class="fas fa-lightbulb"></i> 追加評価の提案
+                    </div>
+                    <p class="suggestions-empty">
+                        現在の入力で活用可能な文献は概ねカバーできています。追加取得の提案はありません。
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        suggestionsSection.innerHTML = `
+            <div class="suggestions-box">
+                <div class="suggestions-title">
+                    <i class="fas fa-lightbulb"></i> 追加評価の提案
+                </div>
+                <p class="suggestions-description">
+                    今の入力に加えて追加評価を行うと、さらに参照できる文献ルールを案内します。
+                </p>
+                ${renderSuggestionGroup('今の時点で追加取得すると活用できる文献', actionable, 'actionable')}
+                ${renderSuggestionGroup('時期条件のため今回は活用できない文献', blocked, 'blocked')}
+            </div>
+        `;
+    }
+
+    function renderSuggestionGroup(title, items, tone) {
+        if (!items || items.length === 0) {
+            return '';
+        }
+
+        return `
+            <div class="suggestion-group">
+                <h3 class="suggestion-group-title ${tone}">
+                    ${title}
+                </h3>
+                <div class="suggestion-list">
+                    ${items.map(item => renderSuggestionCard(item, tone)).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderSuggestionCard(item, tone) {
+        return `
+            <div class="suggestion-card ${tone}">
+                <div class="suggestion-card-header">
+                    <div class="suggestion-card-title">${item.name}</div>
+                    <span class="rule-badge ${item.badge}">${item.evidenceLevel}</span>
+                </div>
+                <div class="suggestion-card-message">${item.message}</div>
+                <div class="suggestion-chip-row">
+                    ${item.missingInputs.map(input => `<span class="suggestion-chip">${input.label}</span>`).join('')}
+                </div>
+                <div class="suggestion-meta">
+                    <div><strong>活用できる内容:</strong> ${item.outcome}</div>
+                    <div><strong>入力箇所:</strong> ${item.sections.join(' / ')}</div>
+                </div>
+                <div class="rule-source">
+                    <i class="fas fa-book-open"></i>
+                    <strong>文献根拠:</strong>
+                    <a href="${item.sourceUrl}" target="_blank" rel="noopener">
+                        ${item.source}
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        `;
     }
     
     /**

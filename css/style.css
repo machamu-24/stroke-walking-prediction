@@ -472,6 +472,120 @@ body {
 }
 
 /* ===========================
+   Suggestions Section
+   =========================== */
+.suggestions-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.suggestions-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--info-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+}
+
+.suggestions-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.suggestions-description,
+.suggestions-empty {
+    margin-top: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.suggestion-group {
+    margin-top: var(--spacing-lg);
+}
+
+.suggestion-group-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.suggestion-group-title.actionable {
+    color: #1d4ed8;
+}
+
+.suggestion-group-title.blocked {
+    color: #9a3412;
+}
+
+.suggestion-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.suggestion-card {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.suggestion-card.blocked {
+    background: rgba(255, 247, 237, 0.92);
+    border-color: rgba(249, 115, 22, 0.25);
+}
+
+.suggestion-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.suggestion-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.suggestion-card-message {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.suggestion-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+}
+
+.suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: white;
+    border: 1px solid #bfdbfe;
+    color: var(--primary-dark);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.suggestion-meta {
+    margin-top: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* ===========================
    Rules Container
    =========================== */
 .rules-container {

@@ -22,6 +22,7 @@ class PredictionStorage {
             inputs: data.inputs,
             results: data.results,
             consensus: data.consensus,
+            suggestions: data.suggestions || null,
             actual_outcome: null,  // 退院時に記録
             notes: ""
         };
