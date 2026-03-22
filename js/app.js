@@ -140,12 +140,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // コンセンサスボックスを表示
         displayConsensus(prediction.consensus);
-
-        // 追加評価の提案を表示
-        displayAssessmentSuggestions(prediction.suggestions);
         
         // 各ルールの結果を表示
         displayRuleResults(prediction.results);
+
+        // 追加評価の提案を表示
+        displayAssessmentSuggestions(prediction.suggestions);
 
         // 保存済みデータ統計を更新
         refreshStats();
