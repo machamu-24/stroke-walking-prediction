@@ -5,56 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>脳卒中後歩行予後予測システム - 文献ベースデモ</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1><i class="fas fa-walking"></i> 脳卒中後歩行予後予測システム</h1>
-                <p class="subtitle">文献ベースのルールエンジン - エビデンスに基づく説明可能な予測</p>
+    <!-- Top Navigation Bar -->
+    <nav class="topbar">
+        <div class="topbar-inner">
+            <div class="topbar-brand">
+                <div class="topbar-logo" aria-hidden="true">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div>
+                    <span class="topbar-title">Stroke Gait Prognosis</span>
+                    <span class="topbar-version">Literature-Based Demo v1.0</span>
+                </div>
+            </div>
+            <div class="topbar-meta">
+                <span class="topbar-badge"><i class="fas fa-book-medical"></i> 文献ベース</span>
+                <span class="topbar-badge"><i class="fas fa-shield-alt"></i> 説明可能AI</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-inner">
+                <h1 class="hero-title">脳卒中後歩行予後予測システム</h1>
+                <p class="hero-subtitle">臨床文献に基づくルールエンジンによる、説明可能な歩行予後予測支援ツール</p>
             </div>
         </header>
 
-        <!-- Info Banner -->
-        <div class="info-banner">
-            <i class="fas fa-info-circle"></i>
-            <div class="info-text">
-                <strong>このシステムについて:</strong> 機械学習ではなく、既存の臨床文献に基づくルールベースエンジンを採用。「なぜこの予測が出たか」を患者・家族・他職種に説明できる透明性の高いシステムです。
+        <!-- System Notice -->
+        <div class="system-notice">
+            <div class="system-notice-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="system-notice-body">
+                <strong>このシステムについて</strong>
+                <p>機械学習ではなく、既存の臨床文献に基づくルールベースエンジンを採用しています。「なぜこの予測が出たか」を患者・家族・他職種に説明できる透明性の高いシステムです。</p>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="content-wrapper">
             <!-- Input Form -->
-            <section class="input-section">
-                <h2><i class="fas fa-edit"></i> 患者情報入力</h2>
+            <section class="panel input-section">
+                <div class="panel-header">
+                    <h2><i class="fas fa-user-edit"></i> 患者情報入力</h2>
+                </div>
                 
-                <form id="prediction-form">
-                    <!-- Section 1: 患者基本情報 -->
-                    <div class="form-section">
-                        <h3>基本情報</h3>
+                <form id="prediction-form" class="panel-body">
+                    <!-- Section 1: 基本情報 -->
+                    <fieldset class="form-section">
+                        <legend class="form-section-legend">
+                            <span class="form-section-number">1</span>
+                            基本情報
+                        </legend>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="age">年齢（歳）</label>
-                                <input type="number" id="age" min="0" max="120" value="70">
+                                <label for="age">年齢<span class="unit">（歳）</span></label>
+                                <input type="number" id="age" min="0" max="120" value="70" class="form-input">
                             </div>
                             <div class="form-group">
                                 <label for="sex">性別</label>
-                                <select id="sex">
+                                <select id="sex" class="form-input">
                                     <option value="男性">男性</option>
                                     <option value="女性">女性</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="days_post_stroke">発症からの日数</label>
-                                <input type="number" id="days_post_stroke" min="0" max="1000" value="7">
+                                <input type="number" id="days_post_stroke" min="0" max="1000" value="7" class="form-input">
                             </div>
                             <div class="form-group">
                                 <label for="stroke_type">病型</label>
-                                <select id="stroke_type">
+                                <select id="stroke_type" class="form-input">
                                     <option value="脳梗塞">脳梗塞</option>
                                     <option value="脳出血">脳出血</option>
                                     <option value="くも膜下出血">くも膜下出血</option>
@@ -62,88 +89,102 @@
                             </div>
                         </div>
                         <div id="timing-alert" class="timing-alert" aria-live="polite" hidden></div>
-                    </div>
+                    </fieldset>
 
                     <!-- Section 2: 神経学的評価 -->
-                    <div class="form-section">
-                        <h3>神経学的評価</h3>
+                    <fieldset class="form-section">
+                        <legend class="form-section-legend">
+                            <span class="form-section-number">2</span>
+                            神経学的評価
+                        </legend>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="nihss">NIHSS スコア（0-42）</label>
-                                <input type="number" id="nihss" min="0" max="42" value="8">
+                                <label for="nihss">NIHSS スコア<span class="unit">（0-42）</span></label>
+                                <input type="number" id="nihss" min="0" max="42" value="8" class="form-input">
                             </div>
-                            <div class="form-group checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="spatial_neglect">
+                            <div class="form-group form-group-checkbox">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="spatial_neglect" class="checkbox-input">
+                                    <span class="checkbox-custom"></span>
                                     半側空間無視あり
                                 </label>
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <!-- Section 3: 身体機能評価 -->
-                    <div class="form-section">
-                        <h3>身体機能評価</h3>
+                    <fieldset class="form-section">
+                        <legend class="form-section-legend">
+                            <span class="form-section-number">3</span>
+                            身体機能評価
+                        </legend>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="tct_score">Trunk Control Test（TCT）スコア（0-100）</label>
-                                <input type="number" id="tct_score" min="0" max="100" value="35">
+                                <label for="tct_score">TCT スコア<span class="unit">（0-100）</span></label>
+                                <input type="number" id="tct_score" min="0" max="100" value="35" class="form-input">
                             </div>
-                            <div class="form-group checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="sitting_balance_30s" checked>
+                            <div class="form-group form-group-checkbox">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sitting_balance_30s" checked class="checkbox-input">
+                                    <span class="checkbox-custom"></span>
                                     座位保持30秒可能
                                 </label>
                             </div>
                             <div class="form-group">
-                                <label for="motricity_index_lower">Motricity Index 下肢スコア（0-100）</label>
-                                <input type="number" id="motricity_index_lower" min="0" max="100" value="40">
+                                <label for="motricity_index_lower">MI 下肢スコア<span class="unit">（0-100）</span></label>
+                                <input type="number" id="motricity_index_lower" min="0" max="100" value="40" class="form-input">
                             </div>
                             <div class="form-group">
-                                <label for="bbs_score">Berg Balance Scale（BBS）スコア（0-56）</label>
-                                <input type="number" id="bbs_score" min="0" max="56" value="12">
+                                <label for="bbs_score">BBS スコア<span class="unit">（0-56）</span></label>
+                                <input type="number" id="bbs_score" min="0" max="56" value="12" class="form-input">
                             </div>
                             <div class="form-group">
-                                <label for="walk_speed_10m">10m歩行速度（m/s）</label>
-                                <input type="number" id="walk_speed_10m" min="0" max="3" step="0.1" value="0.3">
+                                <label for="walk_speed_10m">10m歩行速度<span class="unit">（m/s）</span></label>
+                                <input type="number" id="walk_speed_10m" min="0" max="3" step="0.1" value="0.3" class="form-input">
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <!-- Section 4: 認知機能・社会背景 -->
-                    <div class="form-section">
-                        <h3>認知機能・社会背景</h3>
+                    <fieldset class="form-section">
+                        <legend class="form-section-legend">
+                            <span class="form-section-number">4</span>
+                            認知機能・社会背景
+                        </legend>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="mmse_score">MMSE スコア（0-30）</label>
-                                <input type="number" id="mmse_score" min="0" max="30" value="24">
+                                <label for="mmse_score">MMSE スコア<span class="unit">（0-30）</span></label>
+                                <input type="number" id="mmse_score" min="0" max="30" value="24" class="form-input">
                             </div>
-                            <div class="form-group checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="caregiver_available" checked>
+                            <div class="form-group form-group-checkbox">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="caregiver_available" checked class="checkbox-input">
+                                    <span class="checkbox-custom"></span>
                                     介護者あり
                                 </label>
                             </div>
-                            <div class="form-group checkbox-group">
-                                <label>
-                                    <input type="checkbox" id="diabetes">
+                            <div class="form-group form-group-checkbox">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="diabetes" class="checkbox-input">
+                                    <span class="checkbox-custom"></span>
                                     糖尿病合併
                                 </label>
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
 
-                    <!-- Submit Button -->
+                    <!-- Action Buttons -->
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-calculator"></i> 予測を実行
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play-circle"></i> 予測を実行
                         </button>
-                        <button type="button" id="reset-btn" class="btn-secondary">
-                            <i class="fas fa-redo"></i> リセット
+                        <button type="button" id="reset-btn" class="btn btn-ghost">
+                            <i class="fas fa-redo-alt"></i> リセット
                         </button>
                     </div>
                 </form>
 
+                <!-- Data Tools -->
                 <div class="data-tools">
                     <div class="data-tools-header">
                         <h3><i class="fas fa-database"></i> データ管理</h3>
@@ -151,11 +192,11 @@
                     </div>
 
                     <div class="data-tools-actions">
-                        <button type="button" id="stats-btn" class="btn-secondary">
-                            <i class="fas fa-chart-bar"></i> 統計を更新
+                        <button type="button" id="stats-btn" class="btn btn-outline btn-sm">
+                            <i class="fas fa-sync-alt"></i> 統計を更新
                         </button>
-                        <button type="button" id="export-btn" class="btn-secondary">
-                            <i class="fas fa-file-csv"></i> CSVを出力
+                        <button type="button" id="export-btn" class="btn btn-outline btn-sm">
+                            <i class="fas fa-download"></i> CSVを出力
                         </button>
                     </div>
 
@@ -183,38 +224,42 @@
             </section>
 
             <!-- Results Section -->
-            <section class="results-section" id="results-section" style="display: none;">
-                <h2><i class="fas fa-chart-line"></i> 予測結果</h2>
+            <section class="panel results-section" id="results-section" style="display: none;">
+                <div class="panel-header">
+                    <h2><i class="fas fa-poll"></i> 予測結果</h2>
+                </div>
                 
-                <!-- Consensus Summary -->
-                <div class="consensus-box" id="consensus-box">
-                    <!-- Dynamically filled by JavaScript -->
-                </div>
+                <div class="panel-body">
+                    <!-- Consensus Summary -->
+                    <div class="consensus-box" id="consensus-box">
+                        <!-- Dynamically filled by JavaScript -->
+                    </div>
 
-                <!-- Individual Rules Results -->
-                <div class="rules-container" id="rules-container">
-                    <!-- Dynamically filled by JavaScript -->
-                </div>
+                    <!-- Individual Rules Results -->
+                    <div class="rules-container" id="rules-container">
+                        <!-- Dynamically filled by JavaScript -->
+                    </div>
 
-                <div class="suggestions-section" id="suggestions-section">
-                    <!-- Dynamically filled by JavaScript -->
-                </div>
+                    <div class="suggestions-section" id="suggestions-section">
+                        <!-- Dynamically filled by JavaScript -->
+                    </div>
 
-                <!-- Evidence Level Legend -->
-                <div class="legend-box">
-                    <h3><i class="fas fa-book"></i> エビデンスレベルの説明</h3>
-                    <div class="legend-items">
-                        <div class="legend-item">
-                            <span class="badge badge-sr">SR</span>
-                            <span>Systematic Review（システマティックレビュー）</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="badge badge-cohort">コホート</span>
-                            <span>Cohort Study（コホート研究）</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="badge badge-expert">専門家</span>
-                            <span>Expert Classification（専門家分類）</span>
+                    <!-- Evidence Level Legend -->
+                    <div class="legend-box">
+                        <h3><i class="fas fa-tag"></i> エビデンスレベルの説明</h3>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <span class="badge badge-sr">SR</span>
+                                <span>Systematic Review（システマティックレビュー）</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="badge badge-cohort">Cohort</span>
+                                <span>Cohort Study（コホート研究）</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="badge badge-expert">Expert</span>
+                                <span>Expert Classification（専門家分類）</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -222,12 +267,15 @@
         </div>
 
         <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2026 脳卒中後歩行予後予測システム - 文献ベースデモ版 | 開発: まさむ（理学療法士 / エンジニア）</p>
-            <p class="footer-note">
-                <i class="fas fa-exclamation-triangle"></i> 
-                このツールは臨床判断の補助を目的としており、最終的な判断は医療従事者が行ってください。
-            </p>
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <p class="footer-copy">&copy; 2026 脳卒中後歩行予後予測システム - 文献ベースデモ版</p>
+                <p class="footer-author">開発: まさむ（理学療法士 / エンジニア）</p>
+                <div class="footer-disclaimer">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>このツールは臨床判断の補助を目的としており、最終的な判断は医療従事者が行ってください。</span>
+                </div>
+            </div>
         </footer>
     </div>
 
